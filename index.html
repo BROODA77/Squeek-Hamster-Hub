@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Squeekchain Hamster Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#faf8f4;--card:#fff;--tx:#1c1b19;--mute:#6b675f;--ac:#d9730d;--ok:#2f8f4e;--bad:#c0392b;--bd:#e7e2d8;--bar:#efe9dc;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171613;--card:#201f1b;--tx:#f1eee7;--mute:#a09b90;--ac:#f59a3b;--ok:#5bc27a;--bad:#ee6f60;--bd:#34322c;--bar:#2c2a24}}
+:root[data-theme="dark"]{--bg:#171613;--card:#201f1b;--tx:#f1eee7;--mute:#a09b90;--ac:#f59a3b;--ok:#5bc27a;--bad:#ee6f60;--bd:#34322c;--bar:#2c2a24}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,"Segoe UI",sans-serif}
+main{max-width:520px;margin:0 auto;padding:16px 16px 40px}
+h1{font-size:1.3rem;margin:0}
+h2{font-size:1rem;margin:20px 0 8px}
+.mute{color:var(--mute);font-size:.8rem}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px}
+.tabs{display:flex;gap:6px;margin:12px 0}
+.tabs button{flex:1}
+.tabs button.on{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+.top{display:flex;justify-content:space-between;align-items:flex-end;margin:6px 0 12px}
+.bal{font-size:2rem;font-weight:700;line-height:1}
+.bar{height:8px;background:var(--bar);border-radius:6px;overflow:hidden;margin:6px 0 2px}
+.bar i{display:block;height:100%;background:var(--ac)}
+button{font:inherit;cursor:pointer;border-radius:10px;border:1px solid var(--bd);background:var(--card);color:var(--tx);padding:10px 14px}
+button.p{background:var(--ac);border-color:var(--ac);color:#fff;font-weight:600}
+button:disabled{opacity:.45;cursor:default}
+.row{display:flex;gap:8px;flex-wrap:wrap}
+.row>*{flex:1}
+.chip.on{border-color:var(--ac);color:var(--ac);font-weight:700}
+.days{display:flex;gap:6px;margin:10px 0}
+.days span{flex:1;height:28px;border-radius:8px;background:var(--bar);display:grid;place-items:center;font-size:.8rem}
+.days span.on{background:var(--ac);color:#fff}
+.wheel{font-size:2.6rem;text-align:center;height:56px}
+.spin{display:inline-block;animation:sp .5s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.res{text-align:center;min-height:48px;font-weight:600}
+.win{color:var(--ok)}.lose{color:var(--bad)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.b{display:flex;gap:8px;align-items:center;font-size:.85rem}
+.b .e{font-size:1.4rem}
+.b.lock{opacity:.45}.b.lock .e{filter:grayscale(1)}
+.h,.q{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:.85rem;padding:7px 0;border-bottom:1px solid var(--bd)}
+.h:last-child,.q:last-child{border:0}
+.q button{padding:5px 10px;font-size:.8rem}
+.st b{display:block;font-size:1.2rem}
+.step{display:flex;gap:10px;padding-bottom:12px}
+.step .d{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ac);display:grid;place-items:center}
+.step h3{margin:0;font-size:.92rem}
+.step p{margin:0;font-size:.8rem;color:var(--mute);word-break:break-all}
+.step a{color:var(--ac)}
+input[type=range]{width:100%;accent-color:var(--ac)}
+.mascot{display:flex;justify-content:center;margin:6px 0 2px}
+.hw{position:relative;width:110px;height:110px;cursor:pointer}
+.ring{position:absolute;inset:0;border:5px dashed var(--ac);border-radius:50%;animation:rot 6s linear infinite}
+.ring::after{content:"";position:absolute;inset:14px;border:2px solid var(--bd);border-radius:50%}
+.ham{position:absolute;left:50%;bottom:16px;transform:translateX(-50%);font-size:2.4rem;animation:bob 1.2s ease-in-out infinite}
+.hw.fast .ring{animation-duration:.6s}
+.hw.fast .ham{animation:run .25s ease-in-out infinite}
+.hw.sleep .ring,.hw.sleep .ham{animation:none}
+.hw.jump .ham{animation:jump .6s ease-out}
+.hw.sad .ham{animation:none}
+.z{position:absolute;top:8px;right:10px;font-size:1rem;animation:fl 2s ease-in-out infinite}
+@keyframes rot{to{transform:rotate(360deg)}}
+@keyframes bob{50%{transform:translateX(-50%) translateY(-4px)}}
+@keyframes run{0%,100%{transform:translateX(-50%) translateY(0) rotate(-6deg)}50%{transform:translateX(-50%) translateY(-7px) rotate(6deg)}}
+@keyframes jump{40%{transform:translateX(-50%) translateY(-40px) rotate(-10deg)}100%{transform:translateX(-50%) translateY(0)}}
+@keyframes fl{50%{transform:translateY(-6px);opacity:.5}}
+@media (prefers-reduced-motion:reduce){.ring,.ham,.z{animation:none!important}}
+.foot{margin-top:20px;text-align:center}
+.foot button{font-size:.78rem;padding:6px 10px}
+:root:root:root{--bg:#14102b;--card:#1f1840;--tx:#f4f1ff;--mute:#a89ee0;--ac:#ffcc33;--ok:#39ff88;--bad:#ff4f6d;--bd:#5d4fb5;--bar:#2a2260}
+body{font-family:VT323,"Courier New",monospace;font-size:20px;line-height:1.15;background:var(--bg)}
+body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;background:repeating-linear-gradient(0deg,rgba(0,0,0,.2) 0 1px,transparent 1px 3px)}
+h1,h2,.bal,button{font-family:"Press Start 2P","Courier New",monospace}
+h1{font-size:.95rem;line-height:1.5;color:var(--ac);text-shadow:2px 2px 0 #000}
+h1::after{content:"_";animation:blink 1s steps(2) infinite}
+h2{font-size:.65rem;color:var(--ok);text-transform:uppercase;letter-spacing:1px}
+h2::before{content:"> "}
+.bal{font-size:1.3rem;color:var(--ac);text-shadow:2px 2px 0 #000}
+.mute{font-size:1rem}
+.card{border:4px solid var(--bd);border-radius:0;box-shadow:4px 4px 0 #000}
+button{border:3px solid var(--bd);border-radius:0;box-shadow:3px 3px 0 #000;font-size:.58rem;line-height:1.4;padding:10px 8px;text-transform:uppercase;background:var(--card);color:var(--tx)}
+button:active:not(:disabled){transform:translate(3px,3px);box-shadow:none}
+button.p,.tabs button.on{background:var(--ac);color:#241b00;border-color:#fff3a0}
+button:disabled{opacity:.4}
+.chip.on{border-color:var(--ac);color:var(--ac);background:var(--card)}
+.q button,.foot button{font-size:.5rem;padding:6px}
+.bar{border-radius:0;height:14px;border:2px solid var(--bd);background:#0008}
+.bar i{background:repeating-linear-gradient(90deg,var(--ok) 0 6px,#17b85a 6px 8px)}
+.days span{border-radius:0;border:2px solid var(--bd)}
+.days span.on{background:var(--ac);color:#241b00}
+.res{font-size:1.15rem}
+.step .d{border-radius:0;border:2px solid #000}
+.st b{font-family:"Press Start 2P",monospace;font-size:.8rem;color:var(--ac)}
+.ring{border-color:var(--ac);animation-timing-function:steps(12)}
+.hw .ham{width:84px;height:84px;image-rendering:pixelated;bottom:12px}
+.hw.fast .ham,.hw.jump .ham{animation-timing-function:steps(3)}
+.wal{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:8px 0 2px}
+.wal>div{min-width:0;word-break:break-word}
+#wad{color:var(--ac);font-size:1.15rem}
+#wsw{margin-top:6px}
+.lr{display:flex;gap:8px;align-items:center;padding:6px 4px;border-bottom:1px solid var(--bd)}
+.lr:last-child{border:0}
+.lr .n{min-width:36px}
+.lr .s{margin-left:auto;color:var(--ac)}
+.lr .mute{margin-left:auto}
+.lr .mute+.s{margin-left:8px}
+.lr.me{background:rgba(255,204,51,.15)}
+.wal.hi{animation:pulse .4s steps(2) 6}
+@keyframes pulse{50%{box-shadow:0 0 0 4px var(--ac),4px 4px 0 #000}}
+#toast{position:fixed;left:12px;right:12px;bottom:calc(14px + env(safe-area-inset-bottom,0px));max-width:496px;margin:0 auto;z-index:60;display:none;background:var(--card)}
+#toast.on{display:block}
+@media (prefers-reduced-motion:reduce){.wal.hi{animation:none}}
+#gate{display:none;text-align:center;margin-top:10px}
+.locked #gate{display:block}
+#gate .big{font-size:2.4rem}
+@keyframes blink{50%{opacity:0}}
+@media (prefers-reduced-motion:reduce){h1::after{animation:none}}
+</style>
+</head>
+<body>
+<main>
+<h1>🐹 Squeekchain Hamster Hub</h1>
+<div class="mute">Real wheel data, plus a play-token arcade (SQK has no real value).</div>
+<div class="tabs"><button id="t1" class="on">🎮 Arcade</button><button id="t2">⛓️ Data</button><button id="t3">🏆 Ranks</button></div>
+
+<div class="card wal"><div><div class="mute" id="wst">Wallet not connected</div><div id="wad"></div><button id="wsw" style="display:none">Switch to Sepolia</button></div><button class="p" id="wbtn">Connect wallet</button></div>
+<div class="mute" style="margin-bottom:4px">Read-only: no transactions, no signatures, no keys. Testnet only.</div>
+<div class="mascot"><div class="hw sleep" id="hw"><div class="ring"></div><canvas class="ham" id="ham" width="16" height="16"></canvas><div class="z" id="hz">💤</div></div></div>
+<div class="mute" id="hmsg" style="text-align:center;margin-bottom:6px"></div>
+<div class="card" id="gate"><div class="big">🔒</div><b>Preview mode: connect your wallet to play</b><div class="mute" style="margin:8px 0 12px">Your progress is saved per wallet address in this browser, so you keep it when you come back. Read-only: no transactions, no keys.</div><button class="p" id="gbtn" style="width:100%">Connect wallet</button></div>
+<div class="card" id="toast"><b>👆 Connect your wallet first</b><div class="mute" style="margin-top:4px">Tap Connect wallet at the top to start playing. Your progress is saved to your wallet address.</div><button class="p" id="tg" style="width:100%;margin-top:8px">Connect wallet</button></div>
+<section id="v1">
+<div class="top">
+  <div><div class="mute">Balance</div><div class="bal"><span id="bal"></span> <span style="font-size:1rem">SQK</span></div></div>
+  <div style="text-align:right;min-width:50%"><b id="lv"></b><div class="bar"><i id="xb"></i></div><div class="mute" id="xn"></div></div>
+</div>
+
+<div class="card">
+  <b>Daily check-in</b>
+  <div class="days" id="days"></div>
+  <button class="p" id="claim" style="width:100%"></button>
+  <div class="mute" id="cmsg" style="margin-top:6px"></div>
+</div>
+
+<h2>Lucky spin</h2>
+<div class="card" style="text-align:center">
+  <div class="wheel" id="sw">🎡</div>
+  <button class="p" id="spinb" style="width:100%">Spin (1 free per day)</button>
+  <div class="res" id="sres"></div>
+</div>
+
+<h2>Daily quests</h2>
+<div class="card" id="quests"></div>
+
+<h2>Hamster prediction</h2>
+<div class="card">
+  <div class="wheel" id="wh">🛞</div>
+  <div style="text-align:center"><b>More than 40 work units in the next 10 minutes?</b></div>
+  <div class="mute" style="text-align:center;margin:4px 0 12px">Win pays 1.9x. Outcome is simulated, loosely modeled on the wheel’s activity (it naps a lot).</div>
+  <div class="row" id="chips" style="margin-bottom:10px"></div>
+  <div class="row"><button class="p" id="over">OVER 40</button><button class="p" id="under">UNDER 40</button></div>
+  <div class="res" id="res"></div>
+</div>
+
+<h2>Achievements</h2>
+<div class="card"><div class="grid" id="bd"></div></div>
+<h2>Recent rounds</h2>
+<div class="card" id="hist"></div>
+
+<div class="foot row"><button id="share">📤 Share my score</button><button id="bk">Backup</button><button id="rs">Restore</button><button id="reset">Reset progress</button></div>
+<div class="mute" id="shm" style="text-align:center;margin-top:6px"></div>
+</section>
+
+<section id="v3" style="display:none">
+<div class="row" style="margin-bottom:10px"><button class="p" id="lbd">Daily</button><button id="lbw">Weekly</button></div>
+<div class="mute" id="lbt" style="margin-bottom:8px"></div>
+<div class="card" id="lbl"></div>
+<div id="lbr"></div>
+<h2>Weekly rewards (top 10)</h2>
+<div class="card" id="lbp"></div>
+<p class="mute">Demo mode: rivals are simulated and your score is stored only on this device. A real shared board needs a backend.</p>
+</section>
+<section id="v2" style="display:none">
+<p class="mute">Snapshot of /v1/status, 7 Nov 2026 04:30 UTC. Wheel status: IDLE.</p>
+<div class="grid st" id="stats"></div>
+<h2>From spin to settlement</h2>
+<div class="card" id="flow"></div>
+<h2>When will it happen?</h2>
+<div class="card">
+  <label for="r">If the hamster runs at <b id="rv"></b> work units per hour</label>
+  <input type="range" id="r" min="10" max="800" step="1">
+  <div id="eta"></div>
+</div>
+<p class="mute">Estimates use the average rate since the signer was enrolled (4 Nov 2026). Not live data.</p>
+</section>
+</main>
+<script>
+function $(i){return document.getElementById(i)}
+/* ---------- leaderboards (demo, simulated rivals) ---------- */
+var lbK='d',RW=[1000,600,400,250,250,100,100,100,100,100];
+var BOTS=['WheelWiz','NutHoarder','SqueakKing','ZoomZoom','SeedSniper','PixelPup','TurboTail','CheekyChip','SunflowerSam','RodentRex','NibbleNinja','WhiskerPro','HamsterHal','FluffyFang'];
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function hsh(s){var h=2166136261;for(var i=0;i<s.length;i++){h^=s.charCodeAt(i);h=Math.imul(h,16777619)}return h>>>0}
+function rnd(s){var a=(hsh(s)+0x6D2B79F5)|0,t=Math.imul(a^(a>>>15),1|a);t=(t+Math.imul(t^(t>>>7),61|t))^t;return((t^(t>>>14))>>>0)/4294967296}
+function wkKey(d){d=new Date(d);d.setDate(d.getDate()-((d.getDay()+6)%7));return ds(d)}
+function startWk(){return new Date(wkKey(new Date())+'T00:00:00')}
+function lbRoll(){
+  var t=today(),w=wkKey(new Date());
+  if(G.sc.d!==t){G.sc.d=t;G.sc.day=0}
+  if(G.sc.wk!==w){if(G.sc.wk&&G.sc.week>0)G.last={wk:G.sc.wk,score:G.sc.week,claimed:false};G.sc.wk=w;G.sc.week=0}
+}
+function bs(n,key,kind,f){var r=rnd(n+key+kind),b=kind==='d'?40+r*360:200+r*1800;return Math.round(b*(0.25+0.75*f))}
+function frac(){var s=lbK==='d'?new Date(today()+'T00:00:00'):startWk(),len=lbK==='d'?864e5:6048e5;return Math.min(1,(new Date()-s)/len)}
+function left(){
+  var e=lbK==='d'?new Date(today()+'T00:00:00').getTime()+864e5:startWk().getTime()+6048e5;
+  var m=Math.max(0,Math.round((e-Date.now())/6e4)),d=Math.floor(m/1440),h=Math.floor(m%1440/60);
+  return (d?d+'d ':'')+h+'h '+(m%60)+'m';
+}
+function lbShow(){
+  lbRoll();
+  var key=lbK==='d'?today():wkKey(new Date()),f=frac(),medal=['🥇','🥈','🥉'];
+  var rows=BOTS.map(function(n){return{n:n,s:bs(n,key,lbK,f)}});
+  rows.push({n:wAcc?shortA(wAcc):'YOU',s:lbK==='d'?G.sc.day:G.sc.week,me:1});
+  rows.sort(function(a,b){return b.s-a.s||((a.me?1:0)-(b.me?1:0))});
+  $('lbd').className=lbK==='d'?'p':'';$('lbw').className=lbK==='w'?'p':'';
+  $('lbt').textContent=(lbK==='d'?'Daily':'Weekly')+' board resets in '+left()+'. Score = XP earned.';
+  function row(r,i){return '<div class="lr'+(r.me?' me':'')+'"><span class="n">'+(medal[i]||('#'+(i+1)))+'</span><span>'+esc(r.n)+(r.me?' (you)':'')+'</span>'+(lbK==='w'&&i<10?'<span class="mute">+'+RW[i]+'</span>':'')+'<span class="s">'+r.s+'</span></div>'}
+  var html=rows.slice(0,10).map(row).join(''),mi=-1;
+  rows.forEach(function(r,i){if(r.me)mi=i});
+  if(mi>=10)html+='<div class="mute" style="text-align:center">…</div>'+row(rows[mi],mi);
+  $('lbl').innerHTML=html;
+  $('lbr').innerHTML='';
+  if(G.last&&!G.last.claimed){
+    var rk=1+BOTS.filter(function(n){return bs(n,G.last.wk,'w',1)>G.last.score}).length,rw=rk<=10?RW[rk-1]:0;
+    var c=document.createElement('div');c.className='card';c.style.marginTop='10px';
+    c.innerHTML='<b>Last week</b> (from '+esc(G.last.wk)+')<br>Score: '+G.last.score+' · Rank #'+rk+'<br>'+(rw?'Reward: <span class="win">+'+rw+' SQK</span>':'<span class="mute">No reward this time. Climb into the top 10!</span>');
+    var b=document.createElement('button');b.className='p';b.style.cssText='width:100%;margin-top:8px';b.textContent=rw?'Claim +'+rw+' SQK':'OK';
+    b.onclick=function(){G.last.claimed=true;if(rw)G.bal+=rw;bump();render();lbShow()};
+    c.appendChild(b);$('lbr').appendChild(c);
+  }
+  $('lbp').innerHTML=[['🥇 1st place','1000'],['🥈 2nd place','600'],['🥉 3rd place','400'],['4th to 5th','250'],['6th to 10th','100']].map(function(x){return '<div class="q"><span>'+x[0]+'</span><b>'+x[1]+' SQK</b></div>'}).join('');
+}
+$('lbd').onclick=function(){lbK='d';lbShow()};
+$('lbw').onclick=function(){lbK='w';lbShow()};
+/* ---------- wallet (read-only, EIP-1193) ---------- */
+var SEPOLIA='0xaa36a7',wAcc=null,wChain=null,wBalTxt='';
+function eth(){return window.ethereum||null}
+function shortA(a){return a.slice(0,6)+'…'+a.slice(-4)}
+function wRender(){
+  var ok=wAcc&&wChain===SEPOLIA;
+  $('wbtn').textContent=wAcc?'Disconnect':'Connect wallet';
+  $('wbtn').className=wAcc?'':'p';
+  $('wad').textContent=wAcc?shortA(wAcc)+(ok&&wBalTxt?' · '+wBalTxt:''):'';
+  $('wsw').style.display=(wAcc&&!ok)?'':'none';
+  $('wst').textContent=!wAcc?'Wallet not connected':(ok?'Connected on Sepolia testnet':'Wrong network. Please switch to Sepolia.');
+}
+function wBal(){
+  wBalTxt='';var p=eth();
+  if(!p||!wAcc||wChain!==SEPOLIA){wRender();return}
+  p.request({method:'eth_getBalance',params:[wAcc,'latest']}).then(function(h){
+    wBalTxt=(Number(BigInt(h)/1000000000000n)/1e6).toFixed(4)+' ETH';wRender();
+  }).catch(function(){wRender()});
+}
+var nwT;
+function lockUI(){document.body.classList.toggle('locked',!wAcc);if(wAcc)$('toast').classList.remove('on')}
+function needWallet(){
+  var t=$('toast'),w=document.querySelector('.wal');
+  t.classList.add('on');
+  w.classList.remove('hi');void w.offsetWidth;w.classList.add('hi');
+  window.scrollTo({top:0,behavior:'smooth'});
+  ham('fast','Connect your wallet to play!',3500);
+  clearTimeout(nwT);nwT=setTimeout(function(){t.classList.remove('on')},7000);
+}
+document.addEventListener('click',function(e){
+  if(wAcc)return;
+  var b=e.target.closest&&e.target.closest('button');
+  if(!b||b.closest('.wal')||b.closest('.tabs')||b.closest('#toast')||b.id==='gbtn'||b.id==='lbd'||b.id==='lbw')return;
+  e.preventDefault();e.stopPropagation();needWallet();
+},true);
+function wSet(a,c){wAcc=a&&a[0]?a[0]:null;if(c)wChain=c;G=wAcc?load():def();bet=50;lockUI();render();wRender();wBal()}
+$('gbtn').onclick=function(){wConnect()};
+$('tg').onclick=function(){$('toast').classList.remove('on');wConnect()};
+lockUI();
+function wConnect(){
+  var p=eth();
+  if(!p){$('wst').textContent='No wallet found. Open this page inside your wallet app browser (MetaMask, Trust, Rabby).';return}
+  p.request({method:'eth_requestAccounts'}).then(function(a){
+    return p.request({method:'eth_chainId'}).then(function(c){wSet(a,c)});
+  }).catch(function(e){$('wst').textContent=(e&&e.code===4001)?'Connection cancelled.':'Could not connect.'});
+}
+$('wbtn').onclick=function(){if(wAcc){wAcc=null;wBalTxt='';G=def();lockUI();render();wRender()}else wConnect()};
+$('wsw').onclick=function(){
+  var p=eth();if(!p)return;
+  p.request({method:'wallet_switchEthereumChain',params:[{chainId:SEPOLIA}]}).catch(function(e){
+    $('wst').textContent=(e&&e.code===4902)?'Sepolia is not in your wallet yet. Add it in wallet settings.':'Could not switch network.';
+  });
+};
+(function(){
+  var p=eth();if(!p)return;
+  if(typeof p.on==='function'){
+    p.on('accountsChanged',function(a){wSet(a)});
+    p.on('chainChanged',function(c){wChain=c;wRender();wBal()});
+  }
+  p.request({method:'eth_chainId'}).then(function(c){wChain=c;return p.request({method:'eth_accounts'})}).then(function(a){wSet(a)}).catch(function(){});
+})();
+/* ---------- hamster mascot ---------- */
+var PAL={o:'#3b2314',b:'#e8a45a',w:'#fff3d6',p:'#f08a8a',k:'#1a1a1a',c:'#5ec8ff'};
+var BASE=['................','...oo......oo...','..oppo....oppo..','..oobbbbbbbboo..','.obbbbbbbbbbbbo.','.obbkbbbbbbkbbo.','.obbbbbppbbbbbo.','.obwwbbbbbbwwbo.','.obwwwwwwwwwwbo.','.obwwwwwwwwwwbo.','.obbwwwwwwwwbbo.','..obbbbbbbbbbo..','...oobbbbbboo...','...oppo..oppo...','....oo....oo....','................'];
+var V={sleep:{5:'.obkkbbbbbbkkbo.'},fast:{},jump:{5:'.obkbkbbbbkbkbo.',7:'.obwwbkkkkbwwbo.'},sad:{6:'.obbcbbppbbbbbo.',7:'.obwwbbkkbbwwbo.'}};
+function drawHam(m){var c=$('ham').getContext('2d');c.clearRect(0,0,16,16);var ov=V[m]||{};
+  for(var y=0;y<16;y++){var row=ov[y]||BASE[y];for(var x=0;x<16;x++){var ch=row[x];if(ch!=='.'){c.fillStyle=PAL[ch];c.fillRect(x,y,1,1)}}}}
+var hwT;
+function ham(mode,msg,ms){
+  $('hw').className='hw '+mode;
+  $('hz').style.display=mode==='sleep'?'':'none';
+  drawHam(mode);
+  if(msg)$('hmsg').textContent=msg;
+  clearTimeout(hwT);
+  if(ms)hwT=setTimeout(function(){ham('sleep','Zzz… the wheel is idle. Tap the hamster!')},ms);
+}
+$('hw').onclick=function(){
+  var m=['Wheee!','Squeak squeak!','Zoom zoom!','Snack break soon?','Running for those work units!'];
+  ham('fast',m[Math.floor(Math.random()*m.length)],3500);
+};
+ham('sleep','Zzz… the wheel is idle. Tap the hamster!');
+/* ---------- tabs ---------- */
+$('t1').onclick=function(){tab(1)};$('t2').onclick=function(){tab(2)};$('t3').onclick=function(){tab(3)};
+function tab(n){$('v1').style.display=n===1?'':'none';$('v2').style.display=n===2?'':'none';$('v3').style.display=n===3?'':'none';if(n===3)lbShow();
+  $('t1').className=n===1?'on':'';$('t2').className=n===2?'on':'';$('t3').className=n===3?'on':''}
+
+/* ---------- arcade state ---------- */
+var K='sqk_hub_v2_';
+function kf(){return K+(wAcc||'').toLowerCase()}
+function def(){return{sc:{d:'',day:0,wk:'',week:0},last:null,xpSeen:0,bal:1000,peak:1000,streak:0,last:'',spin:'',xp:0,rounds:0,ws:0,bestWs:0,maxBet:0,hist:[],q:{d:'',p:0,w:0,big:0,c:[0,0,0]}}}
+function load(){try{var s=localStorage.getItem(kf());if(s){var o=JSON.parse(s);if(o.xpSeen===undefined)o.xpSeen=o.xp||0;return Object.assign(def(),o)}}catch(e){}return def()}
+function save(){try{if(wAcc)localStorage.setItem(kf(),JSON.stringify(G))}catch(e){}}
+var G=def(),bet=50,busy=false;
+function ds(d){return d.toLocaleDateString('en-CA')}
+function today(){return ds(new Date())}
+function yest(){var d=new Date();d.setDate(d.getDate()-1);return ds(d)}
+function qd(){if(G.q.d!==today())G.q={d:today(),p:0,w:0,big:0,c:[0,0,0]}}
+function reward(n){return 50+25*Math.min(n-1,6)}
+var titles=['Hatchling','Pup','Trotter','Sprinter','Runner','Racer','Champion','Legend'];
+function gauss(){var u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function roll(){return Math.random()<0.35?Math.floor(Math.random()*6):Math.max(0,Math.round(52+18*gauss()))}
+function lvl(){return Math.floor(Math.sqrt(G.xp/20))+1}
+function bump(){
+  G.peak=Math.max(G.peak,G.bal);lbRoll();
+  var d=G.xp-G.xpSeen;if(d>0){G.sc.day+=d;G.sc.week+=d}G.xpSeen=G.xp;
+  save();
+}
+
+$('claim').onclick=function(){
+  if(G.last===today())return;
+  G.streak=(G.last===yest())?G.streak+1:1;
+  var r=reward(G.streak);G.bal+=r;G.xp+=25;G.last=today();bump();
+  render('Claimed +'+r+' SQK. Streak: '+G.streak+' day(s).');
+  ham('jump','Daily reward! 🎁',2500);
+};
+/* lucky spin */
+var PR=[10,25,50,100,250,500],WT=[30,25,20,15,7,3];
+$('spinb').onclick=function(){
+  if(G.spin===today()||busy)return;
+  busy=true;$('sw').innerHTML='<span class="spin">🎡</span>';$('sres').textContent='';$('spinb').disabled=true;ham('fast','Spinning the lucky wheel…');
+  setTimeout(function(){
+    var x=Math.random()*100,i=0;while(i<5&&x>=WT[i]){x-=WT[i];i++}
+    G.bal+=PR[i];G.xp+=10;G.spin=today();busy=false;bump();
+    render(null,null,'<span class="win">You won +'+PR[i]+' SQK!</span>');
+    ham('jump','Lucky hamster! 🍀',2800);
+  },1200);
+};
+/* quests */
+var QD=[['Play 3 rounds',function(){return Math.min(G.q.p,3)+'/3'},function(){return G.q.p>=3},30],
+ ['Win 2 rounds',function(){return Math.min(G.q.w,2)+'/2'},function(){return G.q.w>=2},40],
+ ['Bet 100+ SQK once',function(){return G.q.big?'1/1':'0/1'},function(){return !!G.q.big},50]];
+function claimQ(i){qd();if(G.q.c[i]||!QD[i][2]())return;G.q.c[i]=1;G.bal+=QD[i][3];G.xp+=15;bump();render()}
+/* prediction */
+function play(side){
+  if(busy||bet<=0||bet>G.bal)return;
+  busy=true;$('wh').innerHTML='<span class="spin">🛞</span>';$('res').textContent='';ham('fast','Go hamster, go!');
+  $('over').disabled=$('under').disabled=true;
+  setTimeout(function(){
+    qd();
+    var w=roll(),win=side==='over'?w>40:w<=40,d=win?Math.round(bet*0.9):-bet;
+    G.bal+=d;G.rounds++;G.xp+=10;G.maxBet=Math.max(G.maxBet,bet);
+    G.ws=win?G.ws+1:0;G.bestWs=Math.max(G.bestWs,G.ws);
+    G.q.p++;if(win)G.q.w++;if(bet>=100)G.q.big=1;
+    G.hist.unshift({s:side,b:bet,w:w,win:win,d:d});G.hist=G.hist.slice(0,6);
+    var m='<span class="'+(win?'win':'lose')+'">Hamster logged '+w+' work units. '+(win?'You win +':'You lose ')+Math.abs(d)+' SQK</span>';
+    if(G.bal<10){G.bal+=100;m+='<br><span class="mute">Faucet topped you up +100 SQK</span>'}
+    busy=false;bump();render(null,m);
+    if(win)ham('jump','Winner winner! 🎉',2800);else ham('sad','Oof, next time!',2500);
+  },1100);
+}
+$('over').onclick=function(){play('over')};
+$('under').onclick=function(){play('under')};
+$('reset').onclick=function(){G=def();bet=50;save();render()};
+$('bk').onclick=function(){
+  var t;try{t=btoa(unescape(encodeURIComponent(JSON.stringify(G))))}catch(e){return}
+  try{navigator.clipboard.writeText(t).then(function(){$('shm').textContent='Backup code copied. Keep it somewhere safe.'},function(){$('shm').textContent=t})}catch(e){$('shm').textContent=t}
+};
+$('rs').onclick=function(){
+  var t=prompt('Paste your backup code');if(!t)return;
+  try{var o=JSON.parse(decodeURIComponent(escape(atob(t.trim()))));
+    if(typeof o.bal!=='number'||typeof o.xp!=='number')throw 0;
+    G=Object.assign(def(),o);save();render();$('shm').textContent='Progress restored.';
+  }catch(e){$('shm').textContent='Invalid backup code.'}
+};
+$('share').onclick=function(){
+  var t='🐹 Squeekchain Hamster Hub: Level '+lvl()+' ('+titles[Math.min(lvl()-1,7)]+'), '+G.bal+' SQK, '+G.streak+'-day streak!';
+  if(navigator.share){navigator.share({text:t}).catch(function(){});return}
+  try{navigator.clipboard.writeText(t).then(function(){$('shm').textContent='Copied: '+t},function(){$('shm').textContent=t})}
+  catch(e){$('shm').textContent=t}
+};
+function render(cm,rm,sm){
+  qd();
+  $('bal').textContent=G.bal.toLocaleString('en-US');
+  var lv=lvl(),lo=(lv-1)*(lv-1)*20,hi=lv*lv*20;
+  $('lv').textContent='Level '+lv+': '+titles[Math.min(lv-1,7)];
+  $('xb').style.width=((G.xp-lo)/(hi-lo)*100)+'%';
+  $('xn').textContent=(hi-G.xp)+' XP to next level';
+  var done=G.last===today(),n=done?G.streak:((G.last===yest())?G.streak+1:1);
+  var lit=done?((G.streak-1)%7+1):((G.last===yest())?(G.streak%7):0);
+  $('days').innerHTML=[1,2,3,4,5,6,7].map(function(i){return '<span class="'+(i<=lit?'on':'')+'">'+i+'</span>'}).join('');
+  $('claim').disabled=done;
+  $('claim').textContent=done?'Claimed today. Come back tomorrow':'Claim +'+reward(n)+' SQK';
+  if(cm)$('cmsg').textContent=cm;
+  var sd=G.spin===today();
+  $('spinb').disabled=sd||busy;$('spinb').textContent=sd?'Spun today. Come back tomorrow':'Spin (1 free per day)';
+  if(!busy)$('sw').textContent='🎡';
+  if(sm)$('sres').innerHTML=sm;
+  $('quests').innerHTML='';
+  QD.forEach(function(q,i){
+    var d=document.createElement('div');d.className='q';
+    var ok=q[2](),cl=G.q.c[i];
+    d.innerHTML='<span>'+q[0]+' <span class="mute">('+q[1]()+')</span></span>';
+    var b=document.createElement('button');
+    b.textContent=cl?'Claimed':(ok?'Claim +'+q[3]:'+'+q[3]+' SQK');b.disabled=cl||!ok;if(ok&&!cl)b.className='p';
+    b.onclick=function(){claimQ(i)};d.appendChild(b);$('quests').appendChild(d);
+  });
+  $('chips').innerHTML='';
+  [10,50,100,250,G.bal].forEach(function(v,i){
+    var b=document.createElement('button');b.className='chip'+(v===bet?' on':'');
+    b.textContent=i===4?'All in':v;b.disabled=v>G.bal||v<=0;
+    b.onclick=function(){bet=v;render()};$('chips').appendChild(b)});
+  if(bet>G.bal)bet=Math.max(1,Math.min(50,G.bal));
+  $('over').disabled=$('under').disabled=busy||bet>G.bal;
+  if(!busy)$('wh').textContent='🛞';
+  if(rm)$('res').innerHTML=rm;
+  var B=[['🎯','First bet',G.rounds>=1],['🔥','3-day streak',G.streak>=3],['📅','7-day streak',G.streak>=7],
+    ['⚡','Hot hand: 3 wins in a row',G.bestWs>=3],['💎','High roller: bet 500+',G.maxBet>=500],['🏦','Rich hamster: 2,000 SQK',G.peak>=2000]];
+  $('bd').innerHTML=B.map(function(b){return '<div class="b'+(b[2]?'':' lock')+'"><span class="e">'+b[0]+'</span><span>'+b[1]+'</span></div>'}).join('');
+  $('hist').innerHTML=G.hist.length?G.hist.map(function(h){
+    return '<div class="h"><span>'+h.s.toUpperCase()+' · bet '+h.b+' · '+h.w+' work</span><span class="'+(h.win?'win':'lose')+'">'+(h.d>0?'+':'')+h.d+'</span></div>'}).join(''):'<div class="mute">No rounds yet.</div>';
+}
+render();
+
+/* ---------- wheel data tab ---------- */
+var S={work:13064,height:1364,prog:125633991,wpb:8.875,dist:1770048,rounds:484,
+enrolled:Date.parse('2026-11-04T21:32:51Z'),at:Date.parse('2026-11-07T04:30:00Z'),
+tx:'0xa3e84d57c5ef09adc29f7748b08d044feaf94dc2ca7c1a5a287d9cd15358d252'};
+var hrs=(S.at-S.enrolled)/36e5,avg=S.work/hrs,frac=S.prog/1e9,mmw=S.dist/S.work;
+function blk(h){return (h-S.height-frac)*S.wpb}
+function fmt(h){if(h<1)return Math.max(1,Math.round(h*60))+' min';if(h<48)return h.toFixed(1)+' h';return (h/24).toFixed(1)+' days'}
+$('stats').innerHTML=[
+ [S.work.toLocaleString('en-US'),'Total work units'],[(S.dist/1e6).toFixed(2)+' km','Distance run'],
+ [avg.toFixed(0)+'/h','Avg work rate'],[(S.height/hrs).toFixed(1)+'/h','Blocks per hour'],
+ [mmw.toFixed(1)+' mm','Distance per work unit'],[(S.rounds/hrs).toFixed(1)+'/h','Settlement rounds']
+].map(function(c){return '<div class="card"><b>'+c[0]+'</b><span class="mute">'+c[1]+'</span></div>'}).join('');
+$('flow').innerHTML=[
+ ['🛞','Wheel spins','Hall sensor on an RP2040 counts rotations. '+(S.dist/1e6).toFixed(2)+' km so far.'],
+ ['⚙️','Work units','Total: '+S.work.toLocaleString('en-US')+' units.'],
+ ['🧱','Block '+(S.height+1),(frac*100).toFixed(1)+'% done, about '+((1-frac)*S.wpb).toFixed(1)+' work to go.'],
+ ['✅','Oracle accepted','Signed with ed25519. Round '+S.rounds+' accepted.'],
+ ['⛓️','Settled on Sepolia','Submitted. Tx: <a href="https://sepolia.etherscan.io/tx/'+S.tx+'" target="_blank" rel="noopener">'+S.tx.slice(0,10)+'…'+S.tx.slice(-6)+'</a>']
+].map(function(s){return '<div class="step"><div class="d">'+s[0]+'</div><div><h3>'+s[1]+'</h3><p>'+s[2]+'</p></div></div>'}).join('');
+var goals=[['Block '+(S.height+1),(1-frac)*S.wpb],['Block 1,400',blk(1400)],['Block 1,500',blk(1500)],['2 km run',(2e6-S.dist)/mmw],['15,000 work units',15000-S.work]];
+var r=$('r');r.value=Math.round(avg);
+function draw(){var v=+r.value;$('rv').textContent=v;
+  $('eta').innerHTML=goals.map(function(g){return '<div class="q"><span>'+g[0]+'</span><b>'+fmt(g[1]/v)+'</b></div>'}).join('')}
+r.addEventListener('input',draw);draw();
+</script>
+</body>
+</html>
