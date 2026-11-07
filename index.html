@@ -1,7 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta name="squeekchain-project" content="36c83aae-f1b2-47f0-9df8-06fafa3c46df">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Squeekchain Hamster Hub</title>
@@ -123,6 +122,36 @@ button:disabled{opacity:.4}
 #gate .big{font-size:2.4rem}
 @keyframes blink{50%{opacity:0}}
 @media (prefers-reduced-motion:reduce){h1::after{animation:none}}
+.modes{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 12px}
+.modes button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px;font-size:.5rem}
+.modes button .e{font-size:1.5rem;line-height:1}
+.modes button.on{background:var(--ac);color:#241b00;border-color:#fff3a0}
+.mode h2:first-child{margin-top:4px}
+/* hamster wheel run */
+.stage{position:relative;height:220px;border:3px solid var(--bd);overflow:hidden;background:linear-gradient(#1a1440,#2d2370);margin-bottom:10px}
+.floor{position:absolute;left:0;right:0;bottom:0;height:26px;border-top:3px solid #000;background:repeating-linear-gradient(90deg,#6b4a2b 0 6px,#5a3d22 6px 12px);z-index:1}
+.stand{position:absolute;left:50%;bottom:26px;width:8px;height:60px;margin-left:-4px;background:#8a84b8;border:2px solid #000;z-index:1}
+.mult{position:absolute;top:8px;left:0;right:0;text-align:center;z-index:5;font-family:"Press Start 2P","Courier New",monospace;font-size:1.1rem;color:#fff;text-shadow:2px 2px 0 #000}
+.mult.out{color:var(--ok)}.mult.crash{color:var(--bad)}
+.wheelw{position:absolute;left:50%;bottom:34px;width:150px;height:150px;margin-left:-75px;z-index:2}
+.wring{position:absolute;inset:0;border:6px solid var(--ac);border-radius:50%;background:rgba(255,255,255,.06);box-shadow:0 0 0 2px #000,inset 0 0 0 2px #000}
+.wring::before{content:"";position:absolute;inset:0;border-radius:50%;background:repeating-conic-gradient(var(--ac) 0 2.5deg,transparent 2.5deg 22.5deg);-webkit-mask:radial-gradient(circle,transparent 62%,#000 63%);mask:radial-gradient(circle,transparent 62%,#000 63%)}
+.wheelw canvas{position:absolute;left:50%;bottom:10px;width:60px;height:60px;margin-left:-30px;image-rendering:pixelated;transform-origin:50% 100%}
+.stage.fly .wheelw canvas{animation:trot .2s steps(2) infinite alternate}
+@keyframes trot{from{transform:translateY(0) rotate(-6deg)}to{transform:translateY(-4px) rotate(6deg)}}
+.wheelw.tired canvas{transform:translateY(6px) scaleY(.86)}
+.sweat{display:none;position:absolute;left:50%;margin-left:8px;bottom:62px;font-size:20px;line-height:1;z-index:4}
+.sweat.on{display:block;animation:drip .6s steps(3) infinite}
+@keyframes drip{to{transform:translateY(10px);opacity:.3}}
+.ej{position:absolute;display:none;z-index:3;left:50%;bottom:28px;width:44px;margin-left:-22px}
+.ej canvas{width:44px;height:44px;image-rendering:pixelated;display:block}
+.ej .pc{display:none;position:absolute;right:-20px;bottom:0;font-size:22px;line-height:1}
+.ej.hop{display:block;animation:hop 1s ease-out forwards}
+.ej.hop .pc{display:block}
+@keyframes hop{0%{transform:translate(0,-16px)}40%{transform:translate(60px,-90px)}100%{transform:translate(110px,0)}}
+.rp{display:inline-block;padding:2px 6px;border:2px solid var(--bd);margin:0 4px 4px 0;font-size:.9rem}
+.rp.lo{color:var(--bad)}.rp.hi{color:var(--ok)}
+@media (prefers-reduced-motion:reduce){.stage.fly .wheelw canvas,.sweat.on{animation:none!important}}
 </style>
 </head>
 <body>
@@ -131,18 +160,24 @@ button:disabled{opacity:.4}
 <div class="mute">Real wheel data, plus a play-token arcade (SQK has no real value).</div>
 <div class="tabs"><button id="t1" class="on">🎮 Arcade</button><button id="t2">⛓️ Data</button><button id="t3">🏆 Ranks</button></div>
 
-<div class="card wal"><div><div class="mute" id="wst">Wallet not connected</div><div id="wad"></div><button id="wsw" style="display:none">Switch to Sepolia</button></div><button class="p" id="wbtn">Connect wallet</button></div>
-<div class="mute" style="margin-bottom:4px">Read-only: no transactions, no signatures, no keys. Testnet only.</div>
+<div class="card wal"><div><div class="mute" id="wst">Playing as guest (wallet optional)</div><div id="wad"></div><button id="wsw" style="display:none">Switch to Sepolia</button></div><button class="p" id="wbtn">Connect wallet</button></div>
+<div class="mute" style="margin-bottom:4px">Optional. Play as a guest, or connect to save progress per wallet address. Read-only: no transactions, no signatures, no keys. Testnet only.</div>
 <div class="mascot"><div class="hw sleep" id="hw"><div class="ring"></div><canvas class="ham" id="ham" width="16" height="16"></canvas><div class="z" id="hz">💤</div></div></div>
 <div class="mute" id="hmsg" style="text-align:center;margin-bottom:6px"></div>
-<div class="card" id="gate"><div class="big">🔒</div><b>Preview mode: connect your wallet to play</b><div class="mute" style="margin:8px 0 12px">Your progress is saved per wallet address in this browser, so you keep it when you come back. Read-only: no transactions, no keys.</div><button class="p" id="gbtn" style="width:100%">Connect wallet</button></div>
-<div class="card" id="toast"><b>👆 Connect your wallet first</b><div class="mute" style="margin-top:4px">Tap Connect wallet at the top to start playing. Your progress is saved to your wallet address.</div><button class="p" id="tg" style="width:100%;margin-top:8px">Connect wallet</button></div>
 <section id="v1">
 <div class="top">
   <div><div class="mute">Balance</div><div class="bal"><span id="bal"></span> <span style="font-size:1rem">SQK</span></div></div>
   <div style="text-align:right;min-width:50%"><b id="lv"></b><div class="bar"><i id="xb"></i></div><div class="mute" id="xn"></div></div>
 </div>
 
+<div class="modes" id="modes">
+  <button id="m1" class="on"><span class="e">🎁</span>Daily</button>
+  <button id="m3"><span class="e">🛞</span>Run</button>
+  <button id="m2"><span class="e">🔮</span>Predict</button>
+  <button id="m4"><span class="e">📊</span>Stats</button>
+</div>
+
+<div class="mode" id="g1">
 <div class="card">
   <b>Daily check-in</b>
   <div class="days" id="days"></div>
@@ -160,6 +195,9 @@ button:disabled{opacity:.4}
 <h2>Daily quests</h2>
 <div class="card" id="quests"></div>
 
+</div>
+
+<div class="mode" id="g2" style="display:none">
 <h2>Hamster prediction</h2>
 <div class="card">
   <div class="wheel" id="wh">🛞</div>
@@ -170,10 +208,38 @@ button:disabled{opacity:.4}
   <div class="res" id="res"></div>
 </div>
 
+</div>
+
+<div class="mode" id="g3" style="display:none">
+<h2>Hamster run</h2>
+<div class="card">
+  <div class="stage" id="stg">
+    <div class="mult" id="mx">1.00x</div>
+    <div class="stand"></div>
+    <div class="wheelw" id="wheel"><div class="wring" id="wring"></div><canvas id="rh" width="16" height="16"></canvas><div class="sweat" id="sweat">💦</div></div>
+    <div class="ej" id="ej"><canvas id="eh" width="16" height="16"></canvas><div class="pc">🌻</div></div>
+    <div class="floor"></div>
+  </div>
+  <div class="mute" style="text-align:center;margin-bottom:10px">The hamster runs in its wheel and the multiplier climbs. It gets tired at a random point, anywhere from 1.00x up to 100x. Cash out before it runs out of energy. Play SQK only.</div>
+  <div class="mute">Bet</div>
+  <div class="row" id="rchips" style="margin-bottom:8px"></div>
+  <div class="mute">Auto cash out</div>
+  <div class="row" id="rauto" style="margin-bottom:10px"></div>
+  <button class="p" id="rbtn" style="width:100%"></button>
+  <div class="res" id="rres"></div>
+  <div class="mute" style="margin:6px 0 4px">Last tired points</div>
+  <div id="rhist"></div>
+</div>
+
+</div>
+
+<div class="mode" id="g4" style="display:none">
 <h2>Achievements</h2>
 <div class="card"><div class="grid" id="bd"></div></div>
 <h2>Recent rounds</h2>
 <div class="card" id="hist"></div>
+
+</div>
 
 <div class="foot row"><button id="share">📤 Share my score</button><button id="bk">Backup</button><button id="rs">Restore</button><button id="reset">Reset progress</button></div>
 <div class="mute" id="shm" style="text-align:center;margin-top:6px"></div>
@@ -260,7 +326,7 @@ function wRender(){
   $('wbtn').className=wAcc?'':'p';
   $('wad').textContent=wAcc?shortA(wAcc)+(ok&&wBalTxt?' · '+wBalTxt:''):'';
   $('wsw').style.display=(wAcc&&!ok)?'':'none';
-  $('wst').textContent=!wAcc?'Wallet not connected':(ok?'Connected on Sepolia testnet':'Wrong network. Please switch to Sepolia.');
+  $('wst').textContent=!wAcc?'Playing as guest (wallet optional)':(ok?'Connected on Sepolia testnet':'Wrong network. Please switch to Sepolia.');
 }
 function wBal(){
   wBalTxt='';var p=eth();
@@ -269,25 +335,8 @@ function wBal(){
     wBalTxt=(Number(BigInt(h)/1000000000000n)/1e6).toFixed(4)+' ETH';wRender();
   }).catch(function(){wRender()});
 }
-var nwT;
-function lockUI(){document.body.classList.toggle('locked',!wAcc);if(wAcc)$('toast').classList.remove('on')}
-function needWallet(){
-  var t=$('toast'),w=document.querySelector('.wal');
-  t.classList.add('on');
-  w.classList.remove('hi');void w.offsetWidth;w.classList.add('hi');
-  window.scrollTo({top:0,behavior:'smooth'});
-  ham('fast','Connect your wallet to play!',3500);
-  clearTimeout(nwT);nwT=setTimeout(function(){t.classList.remove('on')},7000);
-}
-document.addEventListener('click',function(e){
-  if(wAcc)return;
-  var b=e.target.closest&&e.target.closest('button');
-  if(!b||b.closest('.wal')||b.closest('.tabs')||b.closest('#toast')||b.id==='gbtn'||b.id==='lbd'||b.id==='lbw')return;
-  e.preventDefault();e.stopPropagation();needWallet();
-},true);
-function wSet(a,c){wAcc=a&&a[0]?a[0]:null;if(c)wChain=c;G=wAcc?load():def();bet=50;lockUI();render();wRender();wBal()}
-$('gbtn').onclick=function(){wConnect()};
-$('tg').onclick=function(){$('toast').classList.remove('on');wConnect()};
+function lockUI(){}
+function wSet(a,c){wAcc=a&&a[0]?a[0]:null;if(c)wChain=c;G=load();bet=50;lockUI();render();wRender();wBal()}
 lockUI();
 function wConnect(){
   var p=eth();
@@ -296,7 +345,7 @@ function wConnect(){
     return p.request({method:'eth_chainId'}).then(function(c){wSet(a,c)});
   }).catch(function(e){$('wst').textContent=(e&&e.code===4001)?'Connection cancelled.':'Could not connect.'});
 }
-$('wbtn').onclick=function(){if(wAcc){wAcc=null;wBalTxt='';G=def();lockUI();render();wRender()}else wConnect()};
+$('wbtn').onclick=function(){if(wAcc){wAcc=null;wBalTxt='';G=load();bet=50;render();wRender()}else wConnect()};
 $('wsw').onclick=function(){
   var p=eth();if(!p)return;
   p.request({method:'wallet_switchEthereumChain',params:[{chainId:SEPOLIA}]}).catch(function(e){
@@ -315,7 +364,7 @@ $('wsw').onclick=function(){
 var PAL={o:'#3b2314',b:'#e8a45a',w:'#fff3d6',p:'#f08a8a',k:'#1a1a1a',c:'#5ec8ff'};
 var BASE=['................','...oo......oo...','..oppo....oppo..','..oobbbbbbbboo..','.obbbbbbbbbbbbo.','.obbkbbbbbbkbbo.','.obbbbbppbbbbbo.','.obwwbbbbbbwwbo.','.obwwwwwwwwwwbo.','.obwwwwwwwwwwbo.','.obbwwwwwwwwbbo.','..obbbbbbbbbbo..','...oobbbbbboo...','...oppo..oppo...','....oo....oo....','................'];
 var V={sleep:{5:'.obkkbbbbbbkkbo.'},fast:{},jump:{5:'.obkbkbbbbkbkbo.',7:'.obwwbkkkkbwwbo.'},sad:{6:'.obbcbbppbbbbbo.',7:'.obwwbbkkbbwwbo.'}};
-function drawHam(m){var c=$('ham').getContext('2d');c.clearRect(0,0,16,16);var ov=V[m]||{};
+function drawHam(m,cv){var c=(cv||$('ham')).getContext('2d');c.clearRect(0,0,16,16);var ov=V[m]||{};
   for(var y=0;y<16;y++){var row=ov[y]||BASE[y];for(var x=0;x<16;x++){var ch=row[x];if(ch!=='.'){c.fillStyle=PAL[ch];c.fillRect(x,y,1,1)}}}}
 var hwT;
 function ham(mode,msg,ms){
@@ -331,6 +380,15 @@ $('hw').onclick=function(){
   ham('fast',m[Math.floor(Math.random()*m.length)],3500);
 };
 ham('sleep','Zzz… the wheel is idle. Tap the hamster!');
+/* ---------- game modes ---------- */
+var mode=1;
+function setMode(n){
+  mode=n;
+  for(var i=1;i<=4;i++){$('g'+i).style.display=i===n?'':'none';$('m'+i).className=i===n?'on':''}
+  try{localStorage.setItem('sqk_mode',n)}catch(e){}
+}
+[1,2,3,4].forEach(function(i){$('m'+i).onclick=function(){setMode(i)}});
+try{var sm0=+localStorage.getItem('sqk_mode');if(sm0>=1&&sm0<=4)setMode(sm0)}catch(e){}
 /* ---------- tabs ---------- */
 $('t1').onclick=function(){tab(1)};$('t2').onclick=function(){tab(2)};$('t3').onclick=function(){tab(3)};
 function tab(n){$('v1').style.display=n===1?'':'none';$('v2').style.display=n===2?'':'none';$('v3').style.display=n===3?'':'none';if(n===3)lbShow();
@@ -339,10 +397,10 @@ function tab(n){$('v1').style.display=n===1?'':'none';$('v2').style.display=n===
 /* ---------- arcade state ---------- */
 var K='sqk_hub_v2_';
 function kf(){return K+(wAcc||'').toLowerCase()}
-function def(){return{sc:{d:'',day:0,wk:'',week:0},last:null,xpSeen:0,bal:1000,peak:1000,streak:0,last:'',spin:'',xp:0,rounds:0,ws:0,bestWs:0,maxBet:0,hist:[],q:{d:'',p:0,w:0,big:0,c:[0,0,0]}}}
+function def(){return{rh:[],bestX:0,sc:{d:'',day:0,wk:'',week:0},last:null,xpSeen:0,bal:1000,peak:1000,streak:0,last:'',spin:'',xp:0,rounds:0,ws:0,bestWs:0,maxBet:0,hist:[],q:{d:'',p:0,w:0,big:0,c:[0,0,0]}}}
 function load(){try{var s=localStorage.getItem(kf());if(s){var o=JSON.parse(s);if(o.xpSeen===undefined)o.xpSeen=o.xp||0;return Object.assign(def(),o)}}catch(e){}return def()}
-function save(){try{if(wAcc)localStorage.setItem(kf(),JSON.stringify(G))}catch(e){}}
-var G=def(),bet=50,busy=false;
+function save(){try{localStorage.setItem(kf(),JSON.stringify(G))}catch(e){}}
+var G=load(),bet=50,busy=false;
 function ds(d){return d.toLocaleDateString('en-CA')}
 function today(){return ds(new Date())}
 function yest(){var d=new Date();d.setDate(d.getDate()-1);return ds(d)}
@@ -420,6 +478,132 @@ $('share').onclick=function(){
   try{navigator.clipboard.writeText(t).then(function(){$('shm').textContent='Copied: '+t},function(){$('shm').textContent=t})}
   catch(e){$('shm').textContent=t}
 };
+/* ---------- hamster wheel run ---------- */
+var R={fly:false,cashed:false,cp:1,t0:0,m:1,bet:0,raf:0,acc:null,face:0,tm:0,ang:0,spd:0,last:0,slow:0},rbet=50,rauto=0;
+var RM=!!(window.matchMedia&&matchMedia('(prefers-reduced-motion:reduce)').matches);
+function rMult(t){return Math.exp(0.00018*t)}
+function rSpeed(m){return RM?0:160+260*Math.min(1,Math.log(m)/Math.log(25))}
+function rSpin(dt){R.ang=(R.ang+R.spd*dt)%360;$('wring').style.transform='rotate('+R.ang+'deg)'}
+function rAnim(el,cls){el.className='';void el.offsetWidth;el.className=cls}
+function rHop(){
+  drawHam('jump',$('eh'));
+  $('rh').getContext('2d').clearRect(0,0,16,16);
+  $('sweat').className='sweat';
+  rAnim($('ej'),'ej hop');
+}
+function rReset(){
+  if(R.fly)return;
+  cancelAnimationFrame(R.slow);R.spd=0;
+  $('wring').style.transform='';$('wheel').className='wheelw';
+  $('sweat').className='sweat';$('ej').className='ej';
+  drawHam('sleep',$('rh'));
+}
+function rSettle(d,x){
+  qd();var win=d>0;
+  G.rounds++;G.xp+=10;G.maxBet=Math.max(G.maxBet,R.bet);
+  G.ws=win?G.ws+1:0;G.bestWs=Math.max(G.bestWs,G.ws);
+  G.q.p++;if(win)G.q.w++;if(R.bet>=100)G.q.big=1;
+  if(win)G.bestX=Math.max(G.bestX||0,x);
+  G.hist.unshift({s:'rocket',b:R.bet,x:x,cp:R.cp,win:win,d:d});G.hist=G.hist.slice(0,6);
+}
+function rLaunch(){
+  if(R.fly||busy||rbet<=0||rbet>G.bal)return;
+  clearTimeout(R.tm);cancelAnimationFrame(R.slow);
+  R.bet=rbet;G.bal-=R.bet;
+  var r=Math.random();
+  R.cp=Math.min(100,Math.max(1,Math.floor(96/(1-r))/100));
+  busy=true;R.fly=true;R.cashed=false;R.acc=wAcc;R.face=0;R.m=1;
+  $('stg').className='stage fly';$('mx').className='mult';$('mx').textContent='1.00x';
+  $('wheel').className='wheelw';$('sweat').className='sweat';$('ej').className='ej';
+  $('rres').textContent='';
+  drawHam('fast',$('rh'));
+  R.spd=rSpeed(1);
+  ham('fast','Run, hamster, run! 🛞');
+  bump();render();
+  R.t0=R.last=performance.now();
+  R.raf=requestAnimationFrame(rLoop);
+}
+function rAbort(){
+  cancelAnimationFrame(R.raf);R.fly=false;busy=false;
+  $('stg').className='stage';$('mx').className='mult';$('mx').textContent='1.00x';
+  rReset();rRender();
+}
+function rLoop(now){
+  if(wAcc!==R.acc){rAbort();return}
+  var dt=Math.min(.1,(now-R.last)/1000),m=rMult(now-R.t0);R.last=now;
+  if(m>=R.cp){rCrash();return}
+  R.m=m;R.spd=rSpeed(m);rSpin(dt);
+  $('mx').textContent=m.toFixed(2)+'x';
+  if(!R.cashed){
+    if(rauto&&m>=rauto){rCash(rauto)}
+    else $('rbtn').textContent='Cash out +'+(Math.floor(R.bet*m)-R.bet)+' SQK';
+    if(!R.cashed){
+      if(m>=3&&!R.face){R.face=1;drawHam('jump',$('rh'))}
+      if(m>=8)$('sweat').className='sweat on';
+    }
+  }
+  R.raf=requestAnimationFrame(rLoop);
+}
+function rCash(x){
+  if(!R.fly||R.cashed)return;
+  var mm=x||R.m,pay=Math.floor(R.bet*mm),d=pay-R.bet;
+  R.cashed=true;G.bal+=pay;rSettle(d,mm);
+  $('mx').className='mult out';
+  rHop();
+  $('rres').innerHTML=d>0?'<span class="win">Cashed out at '+mm.toFixed(2)+'x: +'+d+' SQK</span>':'<span class="mute">Cashed out at '+mm.toFixed(2)+'x: break even</span>';
+  ham(d>0?'jump':'fast',d>0?'Hamster hopped off with a snack! 🌻':'Phew, hamster hopped off!',2500);
+  bump();render();
+}
+function rSlow(now){
+  var dt=Math.min(.1,(now-R.last)/1000);R.last=now;
+  R.spd*=Math.exp(-3.2*dt);rSpin(dt);
+  if(R.spd>4)R.slow=requestAnimationFrame(rSlow);
+}
+function rCrash(){
+  cancelAnimationFrame(R.raf);
+  $('stg').className='stage';
+  $('mx').className='mult crash';$('mx').textContent='TIRED @ '+R.cp.toFixed(2)+'x';
+  var msg;
+  if(!R.cashed){
+    rSettle(-R.bet,0);
+    drawHam('sad',$('rh'));$('wheel').className='wheelw tired';$('sweat').className='sweat on';
+    msg='<span class="lose">Hamster got tired at '+R.cp.toFixed(2)+'x. You lose '+R.bet+' SQK</span>';
+    if(G.bal<10){G.bal+=100;msg+='<br><span class="mute">Faucet topped you up +100 SQK</span>'}
+    ham('sad','So tired… hamster needs a nap 😮‍💨',2500);
+  }else{
+    msg=$('rres').innerHTML+'<br><span class="mute">The wheel ran out of steam at '+R.cp.toFixed(2)+'x</span>';
+  }
+  G.rh.unshift(R.cp);G.rh=G.rh.slice(0,8);
+  R.fly=false;busy=false;
+  R.last=performance.now();R.slow=requestAnimationFrame(rSlow);
+  bump();render();
+  $('rres').innerHTML=msg;
+  R.tm=setTimeout(rReset,2800);
+}
+function rRender(){
+  var c=$('rchips'),a=$('rauto');
+  c.innerHTML='';
+  [10,50,100,250,G.bal].forEach(function(v,i){
+    var b=document.createElement('button');b.className='chip'+(v===rbet?' on':'');
+    b.textContent=i===4?'All in':v;b.disabled=R.fly||v>G.bal||v<=0;
+    b.onclick=function(){rbet=v;rRender()};c.appendChild(b)});
+  if(rbet>G.bal)rbet=Math.max(1,Math.min(50,G.bal));
+  a.innerHTML='';
+  [[0,'Off'],[1.5,'1.5x'],[2,'2x'],[5,'5x'],[10,'10x']].forEach(function(o){
+    var b=document.createElement('button');b.className='chip'+(o[0]===rauto?' on':'');
+    b.textContent=o[1];b.disabled=R.fly;
+    b.onclick=function(){rauto=o[0];rRender()};a.appendChild(b)});
+  var btn=$('rbtn');
+  if(!R.fly){btn.textContent='🛞 Start run ('+rbet+' SQK)';btn.disabled=busy||rbet>G.bal||rbet<=0}
+  else if(R.cashed){btn.textContent='Cashed out ✅ watching…';btn.disabled=true}
+  else btn.disabled=false;
+  $('rhist').innerHTML=G.rh&&G.rh.length?G.rh.map(function(x){return '<span class="rp '+(x<2?'lo':'hi')+'">'+x.toFixed(2)+'x</span>'}).join(''):'<div class="mute">No flights yet.</div>';
+}
+$('rbtn').onclick=function(){
+  if(R.fly){if(!R.cashed)rCash()}else rLaunch();
+};
+drawHam('sleep',$('rh'));
+
 function render(cm,rm,sm){
   qd();
   $('bal').textContent=G.bal.toLocaleString('en-US');
@@ -455,11 +639,12 @@ function render(cm,rm,sm){
   $('over').disabled=$('under').disabled=busy||bet>G.bal;
   if(!busy)$('wh').textContent='🛞';
   if(rm)$('res').innerHTML=rm;
+  rRender();
   var B=[['🎯','First bet',G.rounds>=1],['🔥','3-day streak',G.streak>=3],['📅','7-day streak',G.streak>=7],
-    ['⚡','Hot hand: 3 wins in a row',G.bestWs>=3],['💎','High roller: bet 500+',G.maxBet>=500],['🏦','Rich hamster: 2,000 SQK',G.peak>=2000]];
+    ['⚡','Hot hand: 3 wins in a row',G.bestWs>=3],['💎','High roller: bet 500+',G.maxBet>=500],['🏦','Rich hamster: 2,000 SQK',G.peak>=2000],['🏅','Marathon: cash out 10x+',G.bestX>=10]];
   $('bd').innerHTML=B.map(function(b){return '<div class="b'+(b[2]?'':' lock')+'"><span class="e">'+b[0]+'</span><span>'+b[1]+'</span></div>'}).join('');
   $('hist').innerHTML=G.hist.length?G.hist.map(function(h){
-    return '<div class="h"><span>'+h.s.toUpperCase()+' · bet '+h.b+' · '+h.w+' work</span><span class="'+(h.win?'win':'lose')+'">'+(h.d>0?'+':'')+h.d+'</span></div>'}).join(''):'<div class="mute">No rounds yet.</div>';
+    return '<div class="h"><span>'+(h.s==='rocket'?'RUN · bet '+h.b+' · '+(h.win?'out @ '+h.x.toFixed(2)+'x':'tired @ '+h.cp.toFixed(2)+'x'):h.s.toUpperCase()+' · bet '+h.b+' · '+h.w+' work')+'</span><span class="'+(h.win?'win':'lose')+'">'+(h.d>0?'+':'')+h.d+'</span></div>'}).join(''):'<div class="mute">No rounds yet.</div>';
 }
 render();
 
